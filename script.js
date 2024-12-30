@@ -11,7 +11,7 @@ const LANE_HEIGHT = ROAD_HEIGHT / LANE_COUNT;
 const GRASS_HEIGHT = (CANVAS_HEIGHT - ROAD_HEIGHT) / 2;
 
 // Padding to keep cars away from lane separators
-const LANE_PADDING = 10;
+const LANE_PADDING = 20;
 
 // World coordinates
 let world = {
@@ -123,8 +123,9 @@ class Car {
                 const laneDifference = Math.abs(this.getLaneIndex(this.y) - this.getLaneIndex(det.y));
                 if (laneDifference === 0 && det.x > this.x) {
                     obstacleAhead = true;
-                    if (distance(this.x, this.y, det.x, det.y) < closestObstacleDistance) {
-                        closestObstacleDistance = distance(this.x, this.y, det.x, det.y);
+                    const dist = distance(this.x, this.y, det.x, det.y);
+                    if (dist < closestObstacleDistance) {
+                        closestObstacleDistance = dist;
                     }
                 }
             }
@@ -257,8 +258,8 @@ class Car {
 class Sensors {
     constructor(car) {
         this.car = car;
-        this.rayCount = 36; // Increased to cover more directions
-        this.rayLength = 500; // Increased length
+        this.rayCount = 96; // Increased to cover more directions
+        this.rayLength = 600; // Further increased length
         this.raySpread = 180; // Focused towards the front (90 degrees on each side)
         this.rays = [];
         this.detected = [];
@@ -335,7 +336,7 @@ class Sensors {
             ctx.beginPath();
             ctx.moveTo(screenStartX, screenStartY);
             ctx.lineTo(screenEndX, screenEndY);
-            ctx.strokeStyle = 'rgba(255,0,0,0.2)'; // More transparent for better visibility
+            ctx.strokeStyle = 'rgba(255,0,0,0.3)'; // More transparent for better visibility
             ctx.lineWidth = 1;
             ctx.stroke();
 
@@ -513,7 +514,7 @@ class TrafficLight {
 }
 
 // Sensors Class needs to know rayLength for TrafficLight intersection
-Sensors.prototype.rayLength = 500;
+Sensors.prototype.rayLength = 600;
 
 // Initialize Roads
 function initRoads() {
@@ -563,11 +564,11 @@ function initEntities() {
         true
     );
 
-    // Add some obstacle cars
+    // Add obstacle cars ensuring they are centered within lanes
     for (let i = 0; i < 8; i++) { // Increased number of obstacle cars for higher traffic density
         const lane = Math.floor(Math.random() * LANE_COUNT);
         const x = camera.x + CANVAS_WIDTH / 2 + Math.random() * CANVAS_WIDTH * 3;
-        const y = getLaneCenter(lane);
+        const y = getLaneCenter(lane); // Centered within lane
         const color = getRandomColor();
         const speed = 2 + Math.random() * 2;
         obstacleCarsList.push(new ObstacleCar(x, y, 40, 20, color, speed));
